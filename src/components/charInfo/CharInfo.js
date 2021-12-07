@@ -71,12 +71,21 @@ export class CharInfo extends Component {
 }
 
 const View = ({ char }) => {
-    const { name, thumbnail, description, homepage, wiki } = char;
+    const { name, thumbnail, description, homepage, wiki, comics } = char;
+    console.log(comics);
     const slicedDescription = letterCut(description);
+    let imgStyle = { objectFit: "cover" };
+    if (
+        thumbnail ===
+        "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"
+    ) {
+        imgStyle = { objectFit: "fill" };
+    }
+
     return (
         <>
             <div className="char__basics">
-                <img src={thumbnail} alt="abyss" />
+                <img src={thumbnail} alt="abyss" style={imgStyle} />
                 <div>
                     <div className="char__info-name">{name}</div>
                     <div className="char__btns">
@@ -92,30 +101,20 @@ const View = ({ char }) => {
             <div className="char__descr">{slicedDescription}</div>
             <div className="char__comics">Comics:</div>
             <ul className="char__comics-list">
-                <li className="char__comics-item">
-                    All-Winners Squad: Band of Heroes (2011) #3
-                </li>
-                <li className="char__comics-item">Alpha Flight (1983) #50</li>
-                <li className="char__comics-item">
-                    Amazing Spider-Man (1999) #503
-                </li>
-                <li className="char__comics-item">
-                    Amazing Spider-Man (1999) #504
-                </li>
-                <li className="char__comics-item">
-                    AMAZING SPIDER-MAN VOL. 7: BOOK OF EZEKIEL TPB (Trade
-                    Paperback)
-                </li>
-                <li className="char__comics-item">
-                    Amazing-Spider-Man: Worldwide Vol. 8 (Trade Paperback)
-                </li>
-                <li className="char__comics-item">
-                    Asgardians Of The Galaxy Vol. 2: War Of The Realms (Trade
-                    Paperback)
-                </li>
-                <li className="char__comics-item">Vengeance (2011) #4</li>
-                <li className="char__comics-item">Avengers (1963) #1</li>
-                <li className="char__comics-item">Avengers (1996) #1</li>
+                {comics.length > 0
+                    ? null
+                    : "There is no comics with this character."}
+                {comics.map((item, index) => {
+                    if (index > 9) {
+                        // eslint-disable-next-line array-callback-return
+                        return;
+                    }
+                    return (
+                        <li key={index} className="char__comics-item">
+                            <a href={item.resourceURI}>{item.name}</a>
+                        </li>
+                    );
+                })}
             </ul>
         </>
     );
