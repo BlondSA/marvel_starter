@@ -2,61 +2,60 @@ import React, { Component } from "react";
 import "./randomChar.scss";
 import mjolnir from "../../resources/img/mjolnir.png";
 import MarvelService from "../../services/MarvelService";
+import Spinner from "../spinner/Spinner";
+import ErrorMessage from "../error/Error";
+import { letterCut } from "../../utils/utils";
 
 export default class RandomChar extends Component {
-    constructor(props) {
-        super(props);
-        this.updateState();
-    }
     state = {
-        name: null,
-        description: null,
-        thumbnail: null,
-        homepage: null,
-        wiki: null,
+        char: {
+            name: null,
+            description: null,
+            thumbnail: null,
+            homepage: null,
+            wiki: null,
+        },
+        loading: true,
     };
 
     marvelService = new MarvelService();
 
-    updateState = (state) => {
+    componentDidMount = () => {
+        this.updateChar();
+    };
+
+    onCharLoaded = (char) => {
+        this.setState({ char, loading: false, error: false });
+    };
+
+    onCharLoading = () => {
+        this.setState({ loading: true });
+    };
+
+    onError = () => {
+        this.setState({ loading: false, error: true });
+    };
+
+    updateChar = () => {
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
-        this.marvelService.getCharacter(id).then((res) => {
-            this.setState({
-                name: res.data.results[0].name,
-                description: res.data.results[0].description,
-                thumbnail:
-                    res.data.results[0].thumbnail.path +
-                    "." +
-                    res.data.results[0].thumbnail.extension,
-                homepage: res.data.results[0].urls[0].url,
-                wiki: res.data.results[0].urls[1].url,
-            });
-        });
+        this.onCharLoading();
+        this.marvelService
+            .getCharacter(id)
+            .then(this.onCharLoaded)
+            .catch(this.onError);
     };
 
     render() {
-        const { name, description, thumbnail, homepage, wiki } = this.state;
+        const { char, loading, error } = this.state;
+        const errorMessage = error ? <ErrorMessage /> : null;
+        const spinner = loading ? <Spinner /> : null;
+        const content = !(loading || error) ? <View char={char} /> : null;
+
         return (
             <div className="randomchar">
-                <div className="randomchar__block">
-                    <img
-                        src={thumbnail}
-                        alt="Random character"
-                        className="randomchar__img"
-                    />
-                    <div className="randomchar__info">
-                        <p className="randomchar__name">{name}</p>
-                        <p className="randomchar__descr">{description}</p>
-                        <div className="randomchar__btns">
-                            <a href={homepage} className="button button__main">
-                                <div className="inner">homepage</div>
-                            </a>
-                            <a href={wiki} className="button button__secondary">
-                                <div className="inner">Wiki</div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                {errorMessage}
+                {spinner}
+                {content}
                 <div className="randomchar__static">
                     <p className="randomchar__title">
                         Random character for today!
@@ -65,7 +64,9 @@ export default class RandomChar extends Component {
                     </p>
                     <p className="randomchar__title">Or choose another one</p>
                     <button className="button button__main">
-                        <div className="inner">try it</div>
+                        <div className="inner" onClick={this.updateChar}>
+                            try it
+                        </div>
                     </button>
                     <img
                         src={mjolnir}
@@ -77,3 +78,37 @@ export default class RandomChar extends Component {
         );
     }
 }
+
+const View = ({ char }) => {
+    const { name, description, thumbnail, homepage, wiki } = char;
+    const slicedDescription = letterCut(description, 210);
+    let imgStyle = { objectFit: "cover" };
+    if (
+        thumbnail ===
+        "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"
+    ) {
+        imgStyle = { objectFit: "fill" };
+    }
+    return (
+        <div className="randomchar__block">
+            <img
+                src={thumbnail}
+                alt="Random character"
+                className="randomchar__img"
+                style={imgStyle}
+            />
+            <div className="randomchar__info">
+                <p className="randomchar__name">{name}</p>
+                <p className="randomchar__descr">{slicedDescription}</p>
+                <div className="randomchar__btns">
+                    <a href={homepage} className="button button__main">
+                        <div className="inner">homepage</div>
+                    </a>
+                    <a href={wiki} className="button button__secondary">
+                        <div className="inner">Wiki</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    );
+};
