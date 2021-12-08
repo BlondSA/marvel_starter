@@ -6,55 +6,63 @@ import CharItem from "../charItem/CharItem";
 import Spinner from "../spinner/Spinner";
 class CharList extends Component {
     state = {
-        allChars: [],
+        charList: [],
+        charListEnded: false,
         error: false,
         loading: true,
-        charLoads: 9,
+        newItemLoading: false,
+        offset: 210,
     };
 
     marvelService = new MarvelService();
 
     componentDidMount = () => {
-        this.updateChars();
+        this.onRequest();
     };
 
-    componentDidUpdate = (prevProps, prevState) => {
-        if (this.state.charLoads !== prevState.charLoads) {
-            this.updateChars();
+    onRequest = (limit, offset) => {
+        this.onCharListLoading();
+        this.marvelService
+            .getAllCharacters(limit, offset)
+            .then(this.onCharListLoaded)
+            .catch(this.onErrorMessage);
+    };
+
+    onCharListLoading = () => {
+        this.setState({ newItemLoading: true });
+    };
+
+    onCharListLoaded = (newCharList) => {
+        let endList = false;
+        if (newCharList.length < 9) {
+            endList = true;
         }
-    };
-
-    onCharsLoaded = (allChars) => {
-        this.setState({ allChars, loading: false, error: false });
-    };
-
-    onCharsLoading = () => {
-        this.setState({ loading: true, error: false });
+        this.setState(({ charList, offset }) => ({
+            charList: [...charList, ...newCharList],
+            loading: false,
+            error: false,
+            newItemLoading: false,
+            offset: offset + 9,
+            charListEnd: endList,
+        }));
     };
 
     onErrorMessage = () => {
         this.setState({ error: true, loading: false });
     };
 
-    updateChars = () => {
-        this.onCharsLoading();
-        this.marvelService
-            .getAllCharacters(this.state.charLoads, 210)
-            .then(this.onCharsLoaded)
-            .catch(this.onErrorMessage);
-    };
-
-    onLoadCharMore = () => {
-        this.setState(({ charLoads }) => {
-            return { charLoads: charLoads + 9 };
-        });
-    };
-
     render() {
-        const { allChars, error, loading } = this.state;
+        const {
+            charList,
+            error,
+            loading,
+            offset,
+            newItemLoading,
+            charListEnd,
+        } = this.state;
 
         const contentView = () => {
-            return allChars.map((char) => {
+            return charList.map((char) => {
                 return (
                     <CharItem
                         key={char.id}
@@ -76,10 +84,13 @@ class CharList extends Component {
                     {spinner}
                     {content}
                 </ul>
-                <button className="button button__main button__long">
-                    <div className="inner" onClick={this.onLoadCharMore}>
-                        load more
-                    </div>
+                <button
+                    className="button button__main button__long"
+                    onClick={() => this.onRequest(9, offset)}
+                    disabled={newItemLoading}
+                    style={{ display: charListEnd ? "none" : "block" }}
+                >
+                    <div className="inner">load more</div>
                 </button>
             </div>
         );
