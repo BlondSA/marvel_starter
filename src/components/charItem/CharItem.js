@@ -1,6 +1,6 @@
 import "./charItem.scss";
 
-const CharItem = ({ char, onCharClick }) => {
+const CharItem = ({ char, onCharClick, active }) => {
     const { name, thumbnail } = char;
 
     let imgStyle = { objectFit: "cover" };
@@ -11,8 +11,12 @@ const CharItem = ({ char, onCharClick }) => {
         imgStyle = { objectFit: "fill" };
     }
 
+    const activeClassChar = active
+        ? "char__item char__item_selected"
+        : "char__item";
+
     return (
-        <li className="char__item" onClick={onCharClick}>
+        <li className={activeClassChar} onClick={onCharClick} tabIndex={0}>
             <img src={thumbnail} alt={name} style={imgStyle} />
             <div className="char__name">{name}</div>
         </li>

@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React, { Component } from "react";
 import "./charList.scss";
 import MarvelService from "../../services/MarvelService";
@@ -12,6 +13,7 @@ class CharList extends Component {
         loading: true,
         newItemLoading: false,
         offset: 210,
+        onCharActive: false,
     };
 
     marvelService = new MarvelService();
@@ -61,11 +63,15 @@ class CharList extends Component {
             charListEnd,
         } = this.state;
 
-        const contentView = () => {
+        const View = () => {
             return charList.map((char) => {
+                const active = this.props.selectedChar === char.id;
+                console.log(this.props.charId);
+
                 return (
                     <CharItem
                         key={char.id}
+                        active={active}
                         onCharClick={() => {
                             this.props.onCharSelected(char.id);
                         }}
@@ -76,7 +82,7 @@ class CharList extends Component {
         };
         const errorMessage = error ? <ErrorMessage /> : null;
         const spinner = loading ? <Spinner /> : null;
-        const content = !(loading || error) ? contentView() : null;
+        const content = !(loading || error) ? View() : null;
         return (
             <div className="char__list">
                 <ul className="char__grid">
@@ -96,5 +102,9 @@ class CharList extends Component {
         );
     }
 }
+
+CharList.propTypes = {
+    onCharSelected: PropTypes.func.isRequired,
+};
 
 export default CharList;

@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React, { Component } from "react";
 import "./charInfo.scss";
 import MarvelService from "../../services/MarvelService";
@@ -70,9 +71,12 @@ export class CharInfo extends Component {
     }
 }
 
+CharInfo.propTypes = {
+    charId: PropTypes.number,
+};
+
 const View = ({ char }) => {
     const { name, thumbnail, description, homepage, wiki, comics } = char;
-    console.log(comics);
     const slicedDescription = letterCut(description);
     let imgStyle = { objectFit: "cover" };
     if (
