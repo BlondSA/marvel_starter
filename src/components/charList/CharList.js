@@ -5,6 +5,7 @@ import useMarvelService from "../../services/MarvelService";
 import ErrorMessage from "../error/Error";
 import CharItem from "../charItem/CharItem";
 import Spinner from "../spinner/Spinner";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 
 const CharList = (props) => {
     const [charList, setCharList] = useState([]);
@@ -61,21 +62,27 @@ const CharList = (props) => {
     const spinner = loading && !newItemLoading ? <Spinner /> : null;
 
     return (
-        <div className="char__list">
-            <ul className="char__grid">
-                {errorMessage}
-                {spinner}
-                {View()}
-            </ul>
-            <button
-                className="button button__main button__long"
-                onClick={() => onRequest(9, offset)}
-                disabled={newItemLoading}
-                style={{ display: charListEnd ? "none" : "block" }}
-            >
-                <div className="inner">load more</div>
-            </button>
-        </div>
+        <HelmetProvider>
+            <Helmet>
+                <meta name="description" content="Characters Page" />
+                <title>Marvel Characters</title>
+            </Helmet>
+            <div className="char__list">
+                <ul className="char__grid">
+                    {errorMessage}
+                    {spinner}
+                    {View()}
+                </ul>
+                <button
+                    className="button button__main button__long"
+                    onClick={() => onRequest(9, offset)}
+                    disabled={newItemLoading}
+                    style={{ display: charListEnd ? "none" : "block" }}
+                >
+                    <div className="inner">load more</div>
+                </button>
+            </div>
+        </HelmetProvider>
     );
 };
 
